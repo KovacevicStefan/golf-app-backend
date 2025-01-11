@@ -16,12 +16,12 @@ public class TournamentPlayerController {
     private final TournamentPlayerService tournamentPlayerService;
 
     @GetMapping("/players")
-    public ResponseEntity<List<TournamentPlayer>> getTournamentPlayers() {
+    public ResponseEntity<List<TournamentPlayerResponseDTO>> getTournamentPlayers() {
         return new ResponseEntity<>(tournamentPlayerService.getAllTournamentPlayers(), HttpStatus.OK);
     }
 
     @GetMapping("/tournament-players/{id}")
-    public ResponseEntity<List<TournamentPlayer>> getPlayersByTournamentId(@PathVariable Long id) {
+    public ResponseEntity<List<TournamentPlayerResponseDTO>> getPlayersByTournamentId(@PathVariable Long id) {
         return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayerByTournamentId(id), HttpStatus.OK);
     }
 

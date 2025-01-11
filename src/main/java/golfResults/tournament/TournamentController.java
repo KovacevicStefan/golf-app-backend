@@ -11,6 +11,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/tournaments")
 @AllArgsConstructor
+@CrossOrigin
 public class TournamentController {
 
     private final TournamentService tournamentService;
