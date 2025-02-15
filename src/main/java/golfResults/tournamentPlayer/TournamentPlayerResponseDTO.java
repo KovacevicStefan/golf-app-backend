@@ -6,9 +6,12 @@ import golfResults.user.UserResponseDTO;
 import java.util.Date;
 
 public record TournamentPlayerResponseDTO(
-        Long id,
+        Long playerId,
+        Long tournamentId,
         Date dateJoined,
-        Tournament tournament,
-        UserResponseDTO player
+        String playerUsername,
+        String tournamentName,
+        String playerImage,
+        Long resultId
 ) {
 }

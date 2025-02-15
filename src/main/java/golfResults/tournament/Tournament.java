@@ -23,11 +23,14 @@ public class Tournament {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String name;
     private Date date;
     private Boolean status;
     private String location;
     private String description;
-    private Integer rounds;
+    private Integer roundNumber;
+    private Integer holeNumber;
 
 }

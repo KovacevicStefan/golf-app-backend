@@ -11,6 +11,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
+@CrossOrigin
 public class TournamentPlayerController {
 
     private final TournamentPlayerService tournamentPlayerService;
@@ -20,23 +21,23 @@ public class TournamentPlayerController {
         return new ResponseEntity<>(tournamentPlayerService.getAllTournamentPlayers(), HttpStatus.OK);
     }
 
-    @GetMapping("/tournament-players/{id}")
+    @GetMapping("/players/tournament/{id}")
     public ResponseEntity<List<TournamentPlayerResponseDTO>> getPlayersByTournamentId(@PathVariable Long id) {
         return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayerByTournamentId(id), HttpStatus.OK);
     }
 
-    @GetMapping("/players/{name}")
-    public ResponseEntity<List<TournamentPlayer>> getTournamentPlayers(@PathVariable String name) {
-        return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayersByTournamentName(name), HttpStatus.OK);
+    @GetMapping("/players/player/{id}")
+    public ResponseEntity<List<TournamentPlayerResponseDTO>> getPlayersByPlayerId(@PathVariable Long id) {
+        return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayerByPlayerId(id), HttpStatus.OK);
     }
 
-    @GetMapping("/player-tournaments/{username}")
-    public ResponseEntity<List<TournamentPlayer>> getTournamentPlayer(@PathVariable String username) {
-        return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayersByPlayerUsername(username), HttpStatus.OK);
+    @GetMapping("/players/tournaments/username/{username}")
+    public ResponseEntity<List<TournamentPlayerResponseDTO>> getTournamentsByPlayerUsername(@PathVariable String username) {
+        return new ResponseEntity<>(tournamentPlayerService.getTournamentsByPlayerUsername(username), HttpStatus.OK);
     }
 
     @PostMapping("/players")
-    public ResponseEntity<TournamentPlayer> createTournamentPlayer(@RequestBody TournamentPlayer tournamentPlayer) {
+    public ResponseEntity<TournamentPlayerResponseDTO> createTournamentPlayer(@RequestBody TournamentPlayerRequestDTO tournamentPlayer) {
         return new ResponseEntity<>(tournamentPlayerService.createTournamentPlayer(tournamentPlayer), HttpStatus.CREATED);
     }
 

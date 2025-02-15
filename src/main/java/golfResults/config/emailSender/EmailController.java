@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class EmailController {
 
-    private EmailSendService service;
+    private EmailService emailService;
 
     @PostMapping("/email")
     public void sendEmail(@RequestBody Email email) {
-        service.sendEmail(email);
+        emailService.sendEmail(email);
     }
 }
