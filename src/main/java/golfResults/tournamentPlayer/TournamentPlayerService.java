@@ -1,5 +1,14 @@
 package golfResults.tournamentPlayer;
 
+import golfResults.exception.ResourceNotFoundException;
+import golfResults.hole.Hole;
+import golfResults.hole.HoleRepository;
+import golfResults.round.Round;
+import golfResults.round.RoundRepository;
+import golfResults.tournament.Tournament;
+import golfResults.tournament.TournamentRepository;
+import golfResults.user.User;
+import golfResults.user.UserRepository;
 import golfResults.user.UserResponseDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,51 +23,97 @@ import java.util.Optional;
 public class TournamentPlayerService {
 
     private final TournamentPlayerRepository tournamentPlayerRepository;
+    private final RoundRepository roundRepository;
+    private final HoleRepository holeRepository;
+    private final TournamentRepository tournamentRepository;
+    private final UserRepository userRepository;
 
     public List<TournamentPlayerResponseDTO> getAllTournamentPlayers() {
-        List<TournamentPlayerResponseDTO> response = new ArrayList<>();
-        setTournamentPlayerDTO(tournamentPlayerRepository.findAll(), response);
-        return response;
+        return tournamentPlayerDTOS(tournamentPlayerRepository.findAll(), new ArrayList<>());
     }
-
     public List<TournamentPlayerResponseDTO> getTournamentPlayerByTournamentId(Long id) {
-        List<TournamentPlayerResponseDTO> response = new ArrayList<>();
-        setTournamentPlayerDTO(tournamentPlayerRepository.findTournamentPlayersByTournamentId(id), response);
-        return response;
+        return tournamentPlayerDTOS(tournamentPlayerRepository.findTournamentPlayersByTournamentId(id), new ArrayList<>());
     }
 
-    public TournamentPlayer createTournamentPlayer(TournamentPlayer tournamentPlayer) {
-        tournamentPlayer.setDateJoined(new Date());
-        return tournamentPlayerRepository.save(tournamentPlayer);
+    public List<TournamentPlayerResponseDTO> getTournamentPlayerByPlayerId(Long id) {
+        return tournamentPlayerDTOS(tournamentPlayerRepository.findTournamentPlayersByPlayerId(id), new ArrayList<>());
+    }
+
+    public List<TournamentPlayerResponseDTO> getTournamentsByPlayerUsername(String username) {
+        List<TournamentPlayer> tPlayers = this.tournamentPlayerRepository.findTournamentPlayersByPlayerUsername(username);
+        return tournamentPlayerDTOS(tPlayers, new ArrayList<>());
+    }
+
+    public TournamentPlayerResponseDTO createTournamentPlayer(TournamentPlayerRequestDTO tpRequest) {
+        if (!tournamentRepository.existsById(tpRequest.tournamentId())) {
+            throw new ResourceNotFoundException("Tournament with id = " + tpRequest.tournamentId() + " has not found.");
+        }
+        if (!userRepository.existsById(tpRequest.playerId())) {
+            throw new ResourceNotFoundException("Player with id = " + tpRequest.playerId() + " has not found.");
+        }
+
+        Tournament tournament = tournamentRepository.getReferenceById(tpRequest.tournamentId());
+        User player = userRepository.getReferenceById(tpRequest.playerId());
+
+        Long resultId = tournamentPlayerRepository.findFirstByOrderByResultIdDesc()
+                .map(TournamentPlayer::getResultId)
+                .orElse(0L) + 1;
+
+        TournamentPlayer tournamentPlayer = new TournamentPlayer(player, tournament, resultId, new Date());
+        tournamentPlayerRepository.save(tournamentPlayer);
+
+        createRoundsAndHoles(tournament, tournamentPlayer);
+
+        return tournamentPlayerDTO(tournamentPlayer);
     }
 
     public Optional<TournamentPlayer> deleteTournamentPlayer(Long tournamentPlayerId) {
         tournamentPlayerRepository.deleteById(tournamentPlayerId);
         return tournamentPlayerRepository.findById(tournamentPlayerId);
-    } // Nije uredna metoda
-
-    public List<TournamentPlayer> getTournamentPlayersByTournamentName(String tournamentName) {
-        return tournamentPlayerRepository.findTournamentPlayersByTournamentName(tournamentName);
     }
 
-    public List<TournamentPlayer> getTournamentPlayersByPlayerUsername(String username) {
-        return tournamentPlayerRepository.findTournamentPlayersByPlayerUsername(username);
+    public void createRoundsAndHoles(Tournament tournament, TournamentPlayer tournamentPlayer) {
+
+        int roundNumber = tournament.getRoundNumber();
+        int holeNumber = tournament.getHoleNumber();
+
+        for(int i = 0; i < roundNumber; i++) {
+            Round round = new Round(null, i+1, tournamentPlayer);
+            this.roundRepository.save(round);
+
+            for(int j = 0; j < holeNumber; j++) {
+                Hole hole = new Hole(null, null, null, null, round);
+                this.holeRepository.save(hole);
+            }
+        }
     }
 
-    public void setTournamentPlayerDTO(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> response) {
+    public List<TournamentPlayerResponseDTO> tournamentPlayerDTOS(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> response) {
         for(TournamentPlayer player : players) {
-
-            TournamentPlayerResponseDTO oneResponsePlayer = new TournamentPlayerResponseDTO(player.getId(), player.getDateJoined(), player.getTournament(),
-                    new UserResponseDTO(
-                            player.getPlayer().getId(),
-                            player.getPlayer().getFirstName(),
-                            player.getPlayer().getLastName(),
-                            player.getPlayer().getEmail(),
-                            player.getPlayer().getUsername(),
-                            player.getPlayer().getImage()
-                    ));
+            TournamentPlayerResponseDTO oneResponsePlayer = new TournamentPlayerResponseDTO(
+                    player.getPlayer().getId(),
+                    player.getTournament().getId(),
+                    player.getDateJoined(),
+                    player.getPlayer().getUsername(),
+                    player.getTournament().getName(),
+                    player.getPlayer().getImage(),
+                    player.getResultId()
+            );
             response.add(oneResponsePlayer);
         }
+        return response;
+    }
+
+    public TournamentPlayerResponseDTO tournamentPlayerDTO(TournamentPlayer player) {
+        return new TournamentPlayerResponseDTO(
+                player.getPlayer().getId(),
+                player.getTournament().getId(),
+                player.getDateJoined(),
+                player.getPlayer().getUsername(),
+                player.getTournament().getName(),
+                player.getPlayer().getImage(),
+                player.getResultId()
+        );
     }
 
 }

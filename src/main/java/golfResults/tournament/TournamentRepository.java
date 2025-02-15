@@ -8,5 +8,4 @@ import java.util.Optional;
 public interface TournamentRepository extends JpaRepository<Tournament, Long> {
 
     Optional<Tournament> findByName(String name);
-
 }

@@ -1,4 +1,4 @@
-package golfResults.result;
+package golfResults.hole;
 
 public enum Score {
     DOUBLE_EAGLE,
