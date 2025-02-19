@@ -6,6 +6,7 @@ import java.util.Date;
 
 public record HoleResponseDTO(
         Long id,
+        Integer number,
         Integer par,
         Integer strokes,
         Score score,

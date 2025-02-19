@@ -17,17 +17,22 @@ public class HoleController {
 
     @GetMapping("/holes")
     public ResponseEntity<List<HoleResponseDTO>> getAllHoles() {
-        return new ResponseEntity<>(this.holeService.getAllHoles(), HttpStatus.OK);
+        return new ResponseEntity<>(holeService.getAllHoles(), HttpStatus.OK);
+    }
+
+    @GetMapping("/holes/round/{roundId}")
+    public ResponseEntity<List<HoleResponseDTO>> getHolesByRoundId(@PathVariable Long roundId) {
+        return new ResponseEntity<>(holeService.getHolesByRoundId(roundId), HttpStatus.OK);
+    }
+
+    @GetMapping("/holes/rounds/{resultId}")
+    public ResponseEntity<ResultDTO> getRoundScores(@PathVariable Long resultId) {
+        return new ResponseEntity<>(holeService.getResultByResultId(resultId), HttpStatus.OK);
     }
 
     @PutMapping("/holes/{id}")
     public ResponseEntity<HoleResponseDTO> modifyHole(@RequestBody HoleRequestDTO hole, @PathVariable Long id) {
-        return new ResponseEntity<>(this.holeService.modifyHole(hole, id), HttpStatus.OK);
-    }
-
-    @GetMapping("/holes/rounds/{resultId}")
-    public List<StrokesDTO> getRoundScores(@PathVariable Long resultId) {
-        return holeService.getRoundScores(resultId);
+        return new ResponseEntity<>(holeService.modifyHole(hole, id), HttpStatus.OK);
     }
 
 }

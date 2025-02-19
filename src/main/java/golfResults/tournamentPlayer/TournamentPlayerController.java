@@ -36,6 +36,11 @@ public class TournamentPlayerController {
         return new ResponseEntity<>(tournamentPlayerService.getTournamentsByPlayerUsername(username), HttpStatus.OK);
     }
 
+    @GetMapping("/players/result/{resultId}")
+    public ResponseEntity<TournamentPlayerResponseDTO> getTournamentPlayerByResultId(@PathVariable Long resultId) {
+        return new ResponseEntity<>(tournamentPlayerService.getTournamentPlayerByResultId(resultId), HttpStatus.OK);
+    }
+
     @PostMapping("/players")
     public ResponseEntity<TournamentPlayerResponseDTO> createTournamentPlayer(@RequestBody TournamentPlayerRequestDTO tournamentPlayer) {
         return new ResponseEntity<>(tournamentPlayerService.createTournamentPlayer(tournamentPlayer), HttpStatus.CREATED);

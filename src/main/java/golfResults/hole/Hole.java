@@ -16,6 +16,7 @@ public class Hole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Integer number;
     private Integer par;
     private Integer strokes;
 

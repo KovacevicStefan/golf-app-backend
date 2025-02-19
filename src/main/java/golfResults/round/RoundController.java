@@ -13,6 +13,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api")
 @AllArgsConstructor
+@CrossOrigin
 public class RoundController {
 
     private final RoundService roundService;
@@ -20,6 +21,11 @@ public class RoundController {
     @GetMapping("/rounds")
     public ResponseEntity<List<RoundResponseDTO>> getAllRounds() {
         return new ResponseEntity<>(roundService.getAllRounds(), HttpStatus.OK);
+    }
+
+    @GetMapping("/rounds/result/{resultId}")
+    public ResponseEntity<List<RoundResponseDTO>> getRoundsByResultId(@PathVariable Long resultId) {
+        return new ResponseEntity<>(roundService.getRoundsByResultId(resultId), HttpStatus.OK);
     }
 
     @GetMapping("/rounds/{id}")

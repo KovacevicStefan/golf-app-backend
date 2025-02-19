@@ -24,8 +24,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(PlayerNotRegisteredException.class)
-    public ResponseEntity<ApiError> handleException(PlayerNotRegisteredException e, HttpServletRequest request) {
+    @ExceptionHandler(MissingParValuesException.class)
+    public ResponseEntity<ApiError> handleException(MissingParValuesException e, HttpServletRequest request) {
 
         ApiError apiError = new ApiError(
                 request.getRequestURI(),
