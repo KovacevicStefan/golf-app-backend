@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TournamentPlayerRepository extends JpaRepository<TournamentPlayer, Long> {
 
-    List<TournamentPlayer> findTournamentPlayersByTournamentName(String tournamentName);
+    Optional<TournamentPlayer> findTournamentPlayersByResultId(Long resultId);
     List<TournamentPlayer> findTournamentPlayersByPlayerUsername(String username);
     List<TournamentPlayer> findTournamentPlayersByTournamentId(Long id);
     List<TournamentPlayer> findTournamentPlayersByPlayerId(Long id);

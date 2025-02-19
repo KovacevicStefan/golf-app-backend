@@ -29,15 +29,20 @@ public class RoundService {
         return setDto(round);
     }
 
+    public List<RoundResponseDTO> getRoundsByResultId(Long resultId) {
+        return setDtoList(roundRepository.findRoundsByTournamentPlayerResultId(resultId), new ArrayList<>());
+    }
+
     public RoundResponseDTO setDto(Round round) {
         return new RoundResponseDTO(round.getId(), round.getIndexNumber(), round.getTournamentPlayer().getResultId());
     }
 
-    public void setDtoList(List<Round> roundList, List<RoundResponseDTO> dtoList) {
+    public List<RoundResponseDTO> setDtoList(List<Round> roundList, List<RoundResponseDTO> dtoList) {
         for(Round item : roundList) {
             RoundResponseDTO dtoListItem = new RoundResponseDTO(item.getId(), item.getIndexNumber(), item.getTournamentPlayer().getResultId());
             dtoList.add(dtoListItem);
         }
+        return dtoList;
     }
 
 }
