@@ -31,15 +31,7 @@ public class UserService {
     public UserResponseDTO getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("Could not find user with username: " + username));
-        UserResponseDTO userResponse = new UserResponseDTO(
-                user.getId(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getUsername(),
-                user.getImage()
-        );
-        return userResponse;
+        return userDto(user);
     }
 
     public User saveUser(Long id, User user) {
@@ -57,6 +49,18 @@ public class UserService {
         userRepository.deleteById(id);
         return Optional.ofNullable(tournament);
     }
+
+    public UserResponseDTO userDto(User user) {
+        return UserResponseDTO.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .username(user.getUsername())
+                .image(user.getImage())
+                .build();
+    }
+
 
     public Boolean doesUserExist(Long id) {
         return userRepository.existsById(id);

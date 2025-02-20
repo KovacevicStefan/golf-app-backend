@@ -46,7 +46,7 @@ public class TournamentPlayerService {
     }
 
     public List<TournamentPlayerResponseDTO> getTournamentsByPlayerUsername(String username) {
-        List<TournamentPlayer> tPlayers = this.tournamentPlayerRepository.findTournamentPlayersByPlayerUsername(username);
+        List<TournamentPlayer> tPlayers = tournamentPlayerRepository.findTournamentPlayersByPlayerUsername(username);
         return tournamentPlayerDTOS(tPlayers, new ArrayList<>());
     }
 
@@ -58,6 +58,7 @@ public class TournamentPlayerService {
 
     @Transactional
     public TournamentPlayerResponseDTO createTournamentPlayer(TournamentPlayerRequestDTO tpRequest) {
+
         if (!tournamentRepository.existsById(tpRequest.tournamentId())) {
             throw new ResourceNotFoundException("Tournament with id = " + tpRequest.tournamentId() + " has not found.");
         }
@@ -72,7 +73,13 @@ public class TournamentPlayerService {
                 .map(TournamentPlayer::getResultId)
                 .orElse(0L) + 1;
 
-        TournamentPlayer tournamentPlayer = new TournamentPlayer(player, tournament, resultId, new Date());
+        TournamentPlayer tournamentPlayer = TournamentPlayer.builder()
+                .player(player)
+                .tournament(tournament)
+                .resultId(resultId)
+                .dateJoined(new Date())
+                .build();
+
         tournamentPlayerRepository.save(tournamentPlayer);
 
         createRoundsAndHoles(tournament, tournamentPlayer);
@@ -107,32 +114,32 @@ public class TournamentPlayerService {
         }
     }
 
-    public List<TournamentPlayerResponseDTO> tournamentPlayerDTOS(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> response) {
-        for(TournamentPlayer player : players) {
-            TournamentPlayerResponseDTO oneResponsePlayer = new TournamentPlayerResponseDTO(
-                    player.getPlayer().getId(),
-                    player.getTournament().getId(),
-                    player.getDateJoined(),
-                    player.getPlayer().getUsername(),
-                    player.getTournament().getName(),
-                    player.getPlayer().getImage(),
-                    player.getResultId()
-            );
-            response.add(oneResponsePlayer);
-        }
-        return response;
+    public List<TournamentPlayerResponseDTO> tournamentPlayerDTOS(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> playersDtoList) {
+        playersDtoList.addAll(
+                players.stream()
+                        .map(player -> TournamentPlayerResponseDTO.builder()
+                                .tournamentId(player.getTournament().getId())
+                                .playerId(player.getPlayer().getId())
+                                .dateJoined(player.getDateJoined())
+                                .playerUsername(player.getPlayer().getUsername())
+                                .tournamentName(player.getTournament().getName())
+                                .playerImage(player.getPlayer().getImage())
+                                .resultId(player.getResultId())
+                                .build())
+                        .toList());
+        return playersDtoList;
     }
 
     public TournamentPlayerResponseDTO tournamentPlayerDTO(TournamentPlayer player) {
-        return new TournamentPlayerResponseDTO(
-                player.getPlayer().getId(),
-                player.getTournament().getId(),
-                player.getDateJoined(),
-                player.getPlayer().getUsername(),
-                player.getTournament().getName(),
-                player.getPlayer().getImage(),
-                player.getResultId()
-        );
+        return TournamentPlayerResponseDTO.builder()
+                .tournamentId(player.getTournament().getId())
+                .playerId(player.getPlayer().getId())
+                .dateJoined(player.getDateJoined())
+                .playerUsername(player.getPlayer().getUsername())
+                .tournamentName(player.getTournament().getName())
+                .playerImage(player.getPlayer().getImage())
+                .resultId(player.getResultId())
+                .build();
     }
 
 }

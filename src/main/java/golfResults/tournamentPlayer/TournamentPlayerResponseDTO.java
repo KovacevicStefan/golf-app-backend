@@ -1,10 +1,10 @@
 package golfResults.tournamentPlayer;
 
-import golfResults.tournament.Tournament;
-import golfResults.user.UserResponseDTO;
+import lombok.Builder;
 
 import java.util.Date;
 
+@Builder
 public record TournamentPlayerResponseDTO(
         Long playerId,
         Long tournamentId,

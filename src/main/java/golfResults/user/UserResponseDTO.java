@@ -2,6 +2,7 @@ package golfResults.user;
 
 import lombok.Builder;
 
+@Builder
 public record UserResponseDTO(
         Long id,
         String firstName,
