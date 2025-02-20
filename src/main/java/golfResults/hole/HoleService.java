@@ -37,7 +37,15 @@ public class HoleService {
         Round round = this.roundRepository.findById(holeDto.roundId())
                 .orElseThrow(() -> new ResourceNotFoundException("Round with id = "+holeDto.roundId()+ " has not found"));
 
-        Hole hole = new Hole(id, holeOld.getNumber(), holeDto.par(), holeDto.strokes(), setScore(holeDto), round);
+        Hole hole = Hole.builder()
+                .id(id)
+                .number(holeOld.getNumber())
+                .par(holeOld.getPar())
+                .strokes(holeOld.getStrokes())
+                .score(setScore(holeDto))
+                .round(round)
+                .build();
+
         this.holeRepository.save(hole);
         return setDto(hole, round, id);
     }
@@ -47,21 +55,36 @@ public class HoleService {
 
         return results.stream()
                 .map(result -> new StrokesDTO((Integer) result[0], (Long) result[1]))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public HoleResponseDTO setDto(Hole hole, Round round, Long id) {
-        return new HoleResponseDTO(hole.getId(), hole.getNumber(), hole.getPar(), hole.getStrokes(), hole.getScore(),
-                round.getId(), hole.getRound().getTournamentPlayer().getTournament().getName(),
-                hole.getRound().getTournamentPlayer().getTournament().getDate());
+        return HoleResponseDTO.builder()
+                .id(id)
+                .number(hole.getNumber())
+                .par(hole.getPar())
+                .strokes(hole.getStrokes())
+                .score(hole.getScore())
+                .roundId(round.getId())
+                .tournamentName(hole.getRound().getTournamentPlayer().getTournament().getName())
+                .tournamentDate(hole.getRound().getTournamentPlayer().getTournament().getDate())
+                .build();
     }
 
     public List<HoleResponseDTO> setDtoList(List<Hole> holeList, List<HoleResponseDTO> holeDtoList) {
-        for(Hole item : holeList) {
-            HoleResponseDTO dtoListItem = new HoleResponseDTO(item.getId(), item.getNumber(), item.getPar(), item.getStrokes(), item.getScore(), item.getRound().getId(),
-                    item.getRound().getTournamentPlayer().getTournament().getName(), item.getRound().getTournamentPlayer().getTournament().getDate());
-            holeDtoList.add(dtoListItem);
-        }
+        holeDtoList.addAll(
+                holeList.stream()
+                        .map(hole -> HoleResponseDTO.builder()
+                                .id(hole.getId())
+                                .number(hole.getNumber())
+                                .par(hole.getPar())
+                                .strokes(hole.getStrokes())
+                                .score(hole.getScore())
+                                .roundId(hole.getRound().getId())
+                                .tournamentName(hole.getRound().getTournamentPlayer().getTournament().getName())
+                                .tournamentDate(hole.getRound().getTournamentPlayer().getTournament().getDate())
+                                .build())
+                        .toList());
         return holeDtoList;
     }
 

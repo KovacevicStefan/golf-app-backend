@@ -1,15 +1,11 @@
 package golfResults.round;
 
 import golfResults.exception.ResourceNotFoundException;
-import golfResults.tournament.Tournament;
-import golfResults.tournament.TournamentRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -18,9 +14,7 @@ public class RoundService {
     private final RoundRepository roundRepository;
 
     public List<RoundResponseDTO> getAllRounds() {
-        List<RoundResponseDTO> dtoList = new ArrayList<>();
-        setDtoList(roundRepository.findAll(), dtoList);
-        return dtoList;
+        return setDtoList(roundRepository.findAll(), new ArrayList<>());
     }
 
     public RoundResponseDTO getRoundById(Long id) {
@@ -34,15 +28,23 @@ public class RoundService {
     }
 
     public RoundResponseDTO setDto(Round round) {
-        return new RoundResponseDTO(round.getId(), round.getIndexNumber(), round.getTournamentPlayer().getResultId());
+        return RoundResponseDTO.builder()
+                .id(round.getId())
+                .indexNumber(round.getIndexNumber())
+                .resultId(round.getTournamentPlayer().getResultId())
+                .build();
     }
 
-    public List<RoundResponseDTO> setDtoList(List<Round> roundList, List<RoundResponseDTO> dtoList) {
-        for(Round item : roundList) {
-            RoundResponseDTO dtoListItem = new RoundResponseDTO(item.getId(), item.getIndexNumber(), item.getTournamentPlayer().getResultId());
-            dtoList.add(dtoListItem);
-        }
-        return dtoList;
+    public List<RoundResponseDTO> setDtoList(List<Round> roundList, List<RoundResponseDTO> roundDtoList) {
+        roundDtoList.addAll(
+                roundList.stream()
+                        .map(round -> RoundResponseDTO.builder()
+                                .id(round.getId())
+                                .indexNumber(round.getIndexNumber())
+                                .resultId(round.getTournamentPlayer().getResultId())
+                                .build())
+                        .toList());
+        return roundDtoList;
     }
 
 }

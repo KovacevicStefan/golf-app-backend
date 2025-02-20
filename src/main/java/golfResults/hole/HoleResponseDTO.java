@@ -1,9 +1,10 @@
 package golfResults.hole;
 
-import golfResults.round.RoundResponseDTO;
+import lombok.Builder;
 
 import java.util.Date;
 
+@Builder
 public record HoleResponseDTO(
         Long id,
         Integer number,
