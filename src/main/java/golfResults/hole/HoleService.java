@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -89,12 +88,12 @@ public class HoleService {
     }
 
     public Long getTotalSum(Long resultId) {
-        return holeRepository.findTotalStrokesSum(resultId);
+        return holeRepository.findTotalStrokesSumByResultId(resultId);
     }
 
     public String getTotalPar(Long resultId) {
         Long totalSum = this.getTotalSum(resultId);
-        Long totalPar = holeRepository.findTotalParSum(resultId);
+        Long totalPar = holeRepository.findTotalParSumByResultId(resultId);
         long result = 0L;
         String num = "/";
 

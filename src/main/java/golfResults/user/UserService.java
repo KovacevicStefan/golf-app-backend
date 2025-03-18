@@ -1,7 +1,7 @@
 package golfResults.user;
 
 import golfResults.exception.ResourceNotFoundException;
-import golfResults.tournament.Tournament;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,6 +34,7 @@ public class UserService {
         return userDto(user);
     }
 
+    @Transactional
     public User saveUser(Long id, User user) {
         if (id != null && userRepository.existsById(id)) {
             user.setId(id);
@@ -60,7 +61,6 @@ public class UserService {
                 .image(user.getImage())
                 .build();
     }
-
 
     public Boolean doesUserExist(Long id) {
         return userRepository.existsById(id);
