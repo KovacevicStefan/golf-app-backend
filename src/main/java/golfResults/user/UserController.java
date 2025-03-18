@@ -3,6 +3,8 @@ package golfResults.user;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +17,13 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
+
+    @GetMapping("/me")
+    public ResponseEntity<User> getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return new ResponseEntity<>(currentUser, HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<List<User>> getUsers() {
@@ -31,14 +40,9 @@ public class UserController {
         return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.OK);
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.saveUser(null, user), HttpStatus.CREATED);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User savedUser = userService.saveUser(id, user);
+        User savedUser = userService.saveUser(id, user); // Promeni kasnije
         HttpStatus status = userService.doesUserExist(id) ? HttpStatus.OK : HttpStatus.CREATED;
         return new ResponseEntity<>(savedUser, status);
     }

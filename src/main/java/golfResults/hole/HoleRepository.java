@@ -17,12 +17,12 @@ public interface HoleRepository extends JpaRepository<Hole, Long> {
     @Query("select sum(coalesce(h.strokes, 0)) as totalSum " +
             "from Hole h " +
             "where h.round.tournamentPlayer.resultId = :resultId ")
-    Long findTotalStrokesSum(@Param("resultId") Long resultId);
+    Long findTotalStrokesSumByResultId(@Param("resultId") Long resultId);
 
     @Query("select sum(coalesce(h.par, 0)) as parSum " +
             "from Hole h " +
             "where h.round.tournamentPlayer.resultId = :resultId and h.strokes is not null")
-    Long findTotalParSum(@Param("resultId") Long resultId);
+    Long findTotalParSumByResultId(@Param("resultId") Long resultId);
 
     List<Hole> findHolesByRoundId(Long roundId);
 

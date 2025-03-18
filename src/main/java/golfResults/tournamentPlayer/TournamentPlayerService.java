@@ -37,6 +37,7 @@ public class TournamentPlayerService {
     public List<TournamentPlayerResponseDTO> getAllTournamentPlayers() {
         return tournamentPlayerDTOS(tournamentPlayerRepository.findAll(), new ArrayList<>());
     }
+
     public List<TournamentPlayerResponseDTO> getTournamentPlayerByTournamentId(Long id) {
         return tournamentPlayerDTOS(tournamentPlayerRepository.findTournamentPlayersByTournamentId(id), new ArrayList<>());
     }
