@@ -1,12 +1,12 @@
 package golfResults.config.jwtConfig;
 
 import golfResults.config.emailSender.EmailService;
+import golfResults.exception.ResourceNotFoundException;
 import golfResults.user.*;
 import jakarta.mail.MessagingException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -52,7 +52,7 @@ public class AuthenticationService {
 
     public User authenticate(LoginDTO input) {
         User user = userRepository.findByUsername(input.username())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         if (!user.isEnabled()) {
             System.out.println(user.isEnabled());
             throw new RuntimeException("Account not verified. Please verify your account.");

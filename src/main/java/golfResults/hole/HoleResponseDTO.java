@@ -12,7 +12,6 @@ public record HoleResponseDTO(
         Integer strokes,
         Score score,
         Long roundId,
-        String tournamentName,
-        Date tournamentDate
+        String tournamentName
 ) {
 }

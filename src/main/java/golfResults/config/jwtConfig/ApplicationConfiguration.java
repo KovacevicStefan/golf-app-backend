@@ -16,8 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @AllArgsConstructor
 public class ApplicationConfiguration {
 
-    // ovo se ne koristi
-
     private final UserRepository userRepository;
 
     @Bean
@@ -45,5 +43,4 @@ public class ApplicationConfiguration {
 
         return authProvider;
     }
-
 }

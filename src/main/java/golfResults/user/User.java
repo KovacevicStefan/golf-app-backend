@@ -1,14 +1,16 @@
 package golfResults.user;
 
+import golfResults.tournamentPlayer.TournamentPlayer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,22 +33,22 @@ public class User implements UserDetails {
 
     @Column(unique = true, nullable = false)
     private String username;
-
-    @Column(nullable = false)
     private String password;
     private String image;
 
+    @Enumerated(EnumType.STRING)
+    private Role role;
     private boolean enabled;
-
-    @Column(name = "verification_code")
     private String verificationCode;
-
-    @Column(name = "verification_expiration")
     private LocalDateTime verificationCodeExpiresAt;
+
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TournamentPlayer> tournaments = new ArrayList<>();
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of();
+        return List.of(/*new SimpleGrantedAuthority(role.name())*/);
     }
 
     @Override

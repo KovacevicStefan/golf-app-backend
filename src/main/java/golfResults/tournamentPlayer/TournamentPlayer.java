@@ -29,7 +29,6 @@ public class TournamentPlayer {
 
     @Column(name = "result_id", nullable = false, unique = true)
     private Long resultId;
-
     private Date dateJoined;
 
     public TournamentPlayer(User player, Tournament tournament, Long resultId, Date dateJoined) {

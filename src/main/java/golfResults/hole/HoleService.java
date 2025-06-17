@@ -3,8 +3,14 @@ package golfResults.hole;
 import golfResults.exception.ResourceNotFoundException;
 import golfResults.round.Round;
 import golfResults.round.RoundRepository;
+import golfResults.tournamentPlayer.TournamentPlayer;
+import golfResults.tournamentPlayer.TournamentPlayerRepository;
+import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +21,7 @@ public class HoleService {
 
     private final HoleRepository holeRepository;
     private final RoundRepository roundRepository;
+    private final TournamentPlayerRepository tournamentPlayerRepository;
 
     public List<HoleResponseDTO> getAllHoles() {
         return setDtoList(holeRepository.findAll(), new ArrayList<>());
@@ -33,20 +40,17 @@ public class HoleService {
         Hole holeOld = this.holeRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hole with id = "+id+ "has not found"));
 
-        Round round = this.roundRepository.findById(holeDto.roundId())
-                .orElseThrow(() -> new ResourceNotFoundException("Round with id = "+holeDto.roundId()+ " has not found"));
-
         Hole hole = Hole.builder()
                 .id(id)
                 .number(holeOld.getNumber())
                 .par(holeOld.getPar())
-                .strokes(holeOld.getStrokes())
+                .strokes(holeDto.strokes())
                 .score(setScore(holeDto))
-                .round(round)
+                .round(holeOld.getRound())
                 .build();
 
         this.holeRepository.save(hole);
-        return setDto(hole, round, id);
+        return setDto(hole, holeOld.getRound(), id);
     }
 
     public List<StrokesDTO> getRoundScores(Long resultId) {
@@ -66,7 +70,6 @@ public class HoleService {
                 .score(hole.getScore())
                 .roundId(round.getId())
                 .tournamentName(hole.getRound().getTournamentPlayer().getTournament().getName())
-                .tournamentDate(hole.getRound().getTournamentPlayer().getTournament().getDate())
                 .build();
     }
 
@@ -81,7 +84,6 @@ public class HoleService {
                                 .score(hole.getScore())
                                 .roundId(hole.getRound().getId())
                                 .tournamentName(hole.getRound().getTournamentPlayer().getTournament().getName())
-                                .tournamentDate(hole.getRound().getTournamentPlayer().getTournament().getDate())
                                 .build())
                         .toList());
         return holeDtoList;
@@ -119,6 +121,22 @@ public class HoleService {
                 0, Score.PAR, 1, Score.BOGEY, 2, Score.DOUBLE_BOGEY, 3, Score.THREE_PLUS_BOGEY
         );
         return scoreMap.get(hole.strokes() - hole.par());
+    }
+
+    public List<ResultResponseDTO> getResultsForTournament(Long tournamentId) {
+        List<TournamentPlayer> players = tournamentPlayerRepository.findByTournamentId(tournamentId);
+
+        return players.stream()
+                .map(tp -> {
+                    Long resultId = tp.getResultId();
+                    String username = tp.getPlayer().getUsername();
+                    List<StrokesDTO> roundResults = getRoundScores(resultId);
+                    Long totalStrokes = getTotalSum(resultId);
+                    String totalPar = getTotalPar(resultId);
+
+                    return new ResultResponseDTO(resultId, username, totalPar, roundResults, totalStrokes);
+                })
+                .toList();
     }
 
 }
