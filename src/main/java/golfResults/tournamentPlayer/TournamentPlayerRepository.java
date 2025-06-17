@@ -17,6 +17,4 @@ public interface TournamentPlayerRepository extends JpaRepository<TournamentPlay
 
     @Query("SELECT tp FROM TournamentPlayer tp WHERE tp.tournament.id = :tournamentId")
     List<TournamentPlayer> findByTournamentId(@Param("tournamentId") Long tournamentId);
-
-
 }
