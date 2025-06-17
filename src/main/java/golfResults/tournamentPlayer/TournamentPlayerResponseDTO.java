@@ -12,6 +12,7 @@ public record TournamentPlayerResponseDTO(
         String playerUsername,
         String tournamentName,
         String playerImage,
-        Long resultId
+        Long resultId,
+        Boolean status
 ) {
 }

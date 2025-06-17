@@ -115,6 +115,8 @@ public class TournamentPlayerService {
         }
     }
 
+
+
     public List<TournamentPlayerResponseDTO> tournamentPlayerDTOS(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> playersDtoList) {
         playersDtoList.addAll(
                 players.stream()
@@ -126,6 +128,7 @@ public class TournamentPlayerService {
                                 .tournamentName(player.getTournament().getName())
                                 .playerImage(player.getPlayer().getImage())
                                 .resultId(player.getResultId())
+                                .status(player.getTournament().getStatus())
                                 .build())
                         .toList());
         return playersDtoList;
@@ -140,6 +143,7 @@ public class TournamentPlayerService {
                 .tournamentName(player.getTournament().getName())
                 .playerImage(player.getPlayer().getImage())
                 .resultId(player.getResultId())
+                .status(player.getTournament().getStatus())
                 .build();
     }
 

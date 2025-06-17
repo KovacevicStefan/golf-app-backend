@@ -19,25 +19,28 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<User> getAuthenticatedUser() {
+    public ResponseEntity<UserResponseDTO> getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User currentUser = (User) authentication.getPrincipal();
-        return new ResponseEntity<>(currentUser, HttpStatus.OK);
+        UserResponseDTO user = UserResponseDTO.builder()
+                .id(currentUser.getId()).email(currentUser.getEmail()).firstName(currentUser.getFirstName())
+                .lastName(currentUser.getLastName()).username(currentUser.getUsername()).image(currentUser.getImage()).build();
+        return ResponseEntity.ok(user);
     }
 
     @GetMapping
     public ResponseEntity<List<User>> getUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.getUserById(id), HttpStatus.OK);
+        return ResponseEntity.ok(userService.getUserById(id));
     }
 
     @GetMapping("/username/{username}")
     public ResponseEntity<UserResponseDTO> getUserByUsername(@PathVariable String username) {
-        return new ResponseEntity<>(userService.getUserByUsername(username), HttpStatus.OK);
+        return ResponseEntity.ok(userService.getUserByUsername(username));
     }
 
     @PutMapping("/{id}")
@@ -49,7 +52,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Optional<User>> deleteUser(@PathVariable Long id) {
-        return new ResponseEntity<>(userService.deleteUser(id), HttpStatus.OK);
+        return ResponseEntity.ok(userService.deleteUser(id));
     }
 
     @DeleteMapping("/delete_all")

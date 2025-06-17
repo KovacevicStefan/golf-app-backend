@@ -1,5 +1,9 @@
 package golfResults.tournament;
 
+import golfResults.hole.HoleService;
+import golfResults.hole.ResultResponseDTO;
+import golfResults.tournamentPlayer.TournamentPlayer;
+import golfResults.tournamentPlayer.TournamentPlayerService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +19,16 @@ import java.util.Optional;
 public class TournamentController {
 
     private final TournamentService tournamentService;
+    private final HoleService tournamentPlayerService;
 
     @GetMapping
     public ResponseEntity<List<Tournament>> getAllTournaments() {
         return new ResponseEntity<>(tournamentService.getAllTournaments(), HttpStatus.OK);
+    }
+
+    @GetMapping("/table/{id}")
+    public ResponseEntity<List<ResultResponseDTO>> getResult(@PathVariable Long id) {
+        return new ResponseEntity<>(tournamentPlayerService.getResultsForTournament(id), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
@@ -32,15 +42,15 @@ public class TournamentController {
     } // ?
 
     @PostMapping
-    public ResponseEntity<Tournament> createTournament(@RequestBody Tournament tournament) {
+    public ResponseEntity<Tournament> createTournament(@RequestBody TournamentRequestDTO tournament) {
         return new ResponseEntity<>(tournamentService.saveTournament(null, tournament), HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Tournament> updateTournament(@PathVariable Long id, @RequestBody Tournament tournament) {
-        Tournament savedTournament = tournamentService.saveTournament(id, tournament);
+        //Tournament savedTournament = tournamentService.saveTournament(id, tournament);
         HttpStatus status = tournamentService.doesTournamentExist(id) ? HttpStatus.OK : HttpStatus.CREATED;
-        return new ResponseEntity<>(savedTournament, status);
+        return new ResponseEntity<>(new Tournament(), status);
     }
 
     @DeleteMapping("/{id}")

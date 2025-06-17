@@ -26,7 +26,8 @@ public class Tournament {
 
     @Column(unique = true)
     private String name;
-    private Date date;
+    private Date startDate;
+    private Date endDate;
     private Boolean status;
     private String location;
     private String description;
