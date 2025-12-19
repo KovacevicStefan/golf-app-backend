@@ -1,4 +1,4 @@
-package golfResults.hole;
+package golfResults.hole.dto;
 
 public record StrokesDTO(
          Integer roundIndex,

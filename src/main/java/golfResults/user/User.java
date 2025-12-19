@@ -1,5 +1,6 @@
 package golfResults.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import golfResults.tournamentPlayer.TournamentPlayer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,19 +37,21 @@ public class User implements UserDetails {
     private String password;
     private String image;
 
+    @JsonIgnore
     @Enumerated(EnumType.STRING)
     private Role role;
     private boolean enabled;
     private String verificationCode;
     private LocalDateTime verificationCodeExpiresAt;
 
-    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    @OneToMany(mappedBy = "player")
     private List<TournamentPlayer> tournaments = new ArrayList<>();
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(/*new SimpleGrantedAuthority(role.name())*/);
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
@@ -68,6 +71,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }

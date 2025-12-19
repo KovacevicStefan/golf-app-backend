@@ -1,17 +1,15 @@
 package golfResults.tournament;
 
-import golfResults.exception.ResourceNotFoundException;
+import golfResults.exception.types.ResourceNotFoundException;
 import golfResults.par.Par;
-import golfResults.par.ParDTO;
 import golfResults.par.ParRepository;
+import golfResults.tournament.dto.TournamentRequestDTO;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -54,11 +52,10 @@ public class TournamentService {
         return savedTournament;
     }
 
-    public Optional<Tournament> deleteTournament(Long id) {
-        Tournament tournament = tournamentRepository.findById(id)
+    public void deleteTournament(Long id) {
+        tournamentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot find and delete employee with id = " + id));
         tournamentRepository.deleteById(id);
-        return Optional.of(tournament);
     }
 
     public Tournament mapTournament(Long id, TournamentRequestDTO tournamentDto) {

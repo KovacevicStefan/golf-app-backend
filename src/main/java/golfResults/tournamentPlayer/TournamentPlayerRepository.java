@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface TournamentPlayerRepository extends JpaRepository<TournamentPlayer, Long> {
+public interface TournamentPlayerRepository extends JpaRepository<TournamentPlayer, TournamentPlayerId> {
 
     Optional<TournamentPlayer> findTournamentPlayersByResultId(Long resultId);
     List<TournamentPlayer> findTournamentPlayersByPlayerUsername(String username);

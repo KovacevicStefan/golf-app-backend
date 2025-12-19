@@ -1,7 +1,7 @@
 package golfResults.tournamentPlayer;
 
-import golfResults.exception.MissingParValuesException;
-import golfResults.exception.ResourceNotFoundException;
+import golfResults.exception.types.MissingParValuesException;
+import golfResults.exception.types.ResourceNotFoundException;
 import golfResults.hole.Hole;
 import golfResults.hole.HoleRepository;
 import golfResults.par.Par;
@@ -10,10 +10,10 @@ import golfResults.round.Round;
 import golfResults.round.RoundRepository;
 import golfResults.tournament.Tournament;
 import golfResults.tournament.TournamentRepository;
+import golfResults.tournamentPlayer.dto.TournamentPlayerRequestDTO;
+import golfResults.tournamentPlayer.dto.TournamentPlayerResponseDTO;
 import golfResults.user.User;
 import golfResults.user.UserRepository;
-import golfResults.user.UserResponseDTO;
-import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -88,9 +87,14 @@ public class TournamentPlayerService {
         return tournamentPlayerDTO(tournamentPlayer);
     }
 
-    public Optional<TournamentPlayer> deleteTournamentPlayer(Long tournamentPlayerId) {
-        tournamentPlayerRepository.deleteById(tournamentPlayerId);
-        return tournamentPlayerRepository.findById(tournamentPlayerId);
+    public void deleteTournamentPlayer(Long tournamentId, Long playerId) {
+        TournamentPlayer player = tournamentPlayerRepository.findById(new TournamentPlayerId(playerId, tournamentId))
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Cannot find player with tournamentId=" + tournamentId +
+                                " and playerId=" + playerId
+                ));
+
+        tournamentPlayerRepository.delete(player);
     }
 
     public void createRoundsAndHoles(Tournament tournament, TournamentPlayer tournamentPlayer) {
@@ -114,8 +118,6 @@ public class TournamentPlayerService {
             }
         }
     }
-
-
 
     public List<TournamentPlayerResponseDTO> tournamentPlayerDTOS(List<TournamentPlayer> players, List<TournamentPlayerResponseDTO> playersDtoList) {
         playersDtoList.addAll(

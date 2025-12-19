@@ -1,4 +1,4 @@
-package golfResults.user;
+package golfResults.user.dto;
 
 import lombok.Builder;
 
@@ -9,6 +9,7 @@ public record UserResponseDTO(
         String lastName,
         String email,
         String username,
-        String image
+        String image,
+        boolean enabled
 ) {
 }

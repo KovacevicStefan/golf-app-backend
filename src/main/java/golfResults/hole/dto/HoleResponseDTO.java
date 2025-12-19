@@ -1,8 +1,7 @@
-package golfResults.hole;
+package golfResults.hole.dto;
 
+import golfResults.hole.Score;
 import lombok.Builder;
-
-import java.util.Date;
 
 @Builder
 public record HoleResponseDTO(

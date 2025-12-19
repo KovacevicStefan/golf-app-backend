@@ -1,4 +1,4 @@
-package golfResults.par;
+package golfResults.par.dto;
 
 public record ParDTO(
         Integer holeNumber,

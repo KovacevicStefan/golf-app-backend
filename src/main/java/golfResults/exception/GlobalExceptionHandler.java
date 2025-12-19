@@ -1,6 +1,10 @@
 package golfResults.exception;
 
-import jakarta.mail.MessagingException;
+import golfResults.exception.dto.ApiError;
+import golfResults.exception.dto.AuthorizationError;
+import golfResults.exception.types.MissingParValuesException;
+import golfResults.exception.types.ResourceNotFoundException;
+import golfResults.exception.types.AuthorizationException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +40,16 @@ public class GlobalExceptionHandler {
         );
 
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<AuthorizationError> handleException(AuthorizationException e) {
+        AuthorizationError apiError = new AuthorizationError(
+                e.getHttpStatus().value(),
+                e.getMessage()
+        );
+
+        return new ResponseEntity<>(apiError, e.getHttpStatus());
     }
 
 }

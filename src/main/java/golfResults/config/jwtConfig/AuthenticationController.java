@@ -1,58 +1,51 @@
 package golfResults.config.jwtConfig;
 
 import golfResults.user.*;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import golfResults.user.dto.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/api/auth")
+import java.util.Map;
+
 @RestController
-@CrossOrigin
+@RequestMapping("/api/auth")
 public class AuthenticationController {
 
     private final JwtService jwtService;
-    private final AuthenticationService authenticationService;
+    private final AuthenticationService authService;
 
-    public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
+    public AuthenticationController(JwtService jwtService, AuthenticationService authService) {
         this.jwtService = jwtService;
-        this.authenticationService = authenticationService;
+        this.authService = authService;
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<User> register(@RequestBody RegisterDTO registerUserDto) {
-        User registeredUser = authenticationService.signUp(registerUserDto);
-        return ResponseEntity.ok(registeredUser);
+    @PostMapping("/register")
+    public ResponseEntity<User> register(@RequestBody RegisterDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(authService.signUp(dto));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> authenticate(@RequestBody LoginDTO loginUserDto, HttpServletResponse response){
-
-        User authenticatedUser = authenticationService.authenticate(loginUserDto);
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-        LoginResponseDTO loginResponse = new LoginResponseDTO(jwtToken, jwtService.getExpirationTime());
-        return ResponseEntity.ok(loginResponse);
+    public LoginResponseDTO login(@RequestBody LoginDTO dto) {
+        return new LoginResponseDTO(
+                jwtService.generateToken(authService.authenticate(dto)),
+                jwtService.getExpirationTime());
     }
 
     @PostMapping("/verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyDTO verifyUserDto) {
-        try {
-            authenticationService.verifyUser(verifyUserDto);
-            return ResponseEntity.ok("Account verified successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> verify(@RequestBody VerifyDTO dto) {
+        authService.verifyUser(dto);
+        return ResponseEntity.ok(Map.of(
+                "message", "Account verified successfully."
+            ) //izmeni obavezno
+        );
     }
 
     @PostMapping("/resend")
-    public ResponseEntity<?> resendVerificationCode(@RequestParam String email) {
-        try {
-            authenticationService.resendVerificationCode(email);
-            return ResponseEntity.ok("Verification code sent");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity<?> resend(@RequestParam String email) {
+        authService.resendVerificationCode(email);
+        return ResponseEntity.ok(Map.of(
+                "message", "Verification code sent"
+        ));
     }
-
 }

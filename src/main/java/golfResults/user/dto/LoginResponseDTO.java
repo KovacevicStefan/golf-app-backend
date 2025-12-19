@@ -1,4 +1,4 @@
-package golfResults.user;
+package golfResults.user.dto;
 
 public record LoginResponseDTO(
         String token,

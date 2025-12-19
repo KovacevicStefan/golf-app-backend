@@ -1,8 +1,11 @@
 package golfResults.user;
 
-import golfResults.exception.ResourceNotFoundException;
+import golfResults.exception.types.ResourceNotFoundException;
+import golfResults.user.dto.UserResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +21,16 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        return user.orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public UserResponseDTO getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+        return UserResponseDTO.builder()
+                .id(currentUser.getId()).email(currentUser.getEmail()).firstName(currentUser.getFirstName())
+                .lastName(currentUser.getLastName()).username(currentUser.getUsername()).image(currentUser.getImage()).build();
+    }
+
+    public UserResponseDTO getUserById(Long id) {
+        return userDto(userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User not found")));
     }
 
     public User getUserByEmail(String email) {
@@ -44,11 +54,10 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> deleteUser(Long id) {
+    public void deleteUser(Long id) {
         User tournament = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Cannot find and delete user with id = " + id));
         userRepository.deleteById(id);
-        return Optional.ofNullable(tournament);
     }
 
     public UserResponseDTO userDto(User user) {
@@ -59,6 +68,7 @@ public class UserService {
                 .email(user.getEmail())
                 .username(user.getUsername())
                 .image(user.getImage())
+                .enabled(user.isEnabled())
                 .build();
     }
 
