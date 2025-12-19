@@ -1,4 +1,4 @@
-package golfResults.exception;
+package golfResults.exception.types;
 
 public class ResourceNotFoundException extends RuntimeException {
 

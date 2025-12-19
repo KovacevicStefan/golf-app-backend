@@ -1,9 +1,16 @@
 package golfResults.config.jwtConfig;
 
 import golfResults.config.emailSender.EmailService;
-import golfResults.exception.ResourceNotFoundException;
+import golfResults.exception.types.AuthorizationException;
 import golfResults.user.*;
+import golfResults.user.dto.LoginDTO;
+import golfResults.user.dto.RegisterDTO;
+import golfResults.user.dto.VerifyDTO;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -12,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 public class AuthenticationService {
@@ -33,7 +41,23 @@ public class AuthenticationService {
     }
 
     public User signUp(RegisterDTO input) {
+
+        if (userRepository.existsByEmail(input.email())) {
+            throw new AuthorizationException(
+                    HttpStatus.BAD_REQUEST,
+                    "Email is already in use"
+            );
+        }
+
+        if (userRepository.existsByUsername(input.username())) {
+            throw new AuthorizationException(
+                    HttpStatus.BAD_REQUEST,
+                    "Username is already taken"
+            );
+        }
+
         String encodedPassword = passwordEncoder.encode(input.password());
+
         User user = User.builder()
                 .firstName(input.firstName())
                 .lastName(input.lastName())
@@ -41,50 +65,52 @@ public class AuthenticationService {
                 .username(input.username())
                 .password(encodedPassword)
                 .image(input.image())
+                .role(Role.ROLE_USER)
                 .build();
 
-        user.setVerificationCode(generateVerificationCode());
+        user.setVerificationCode(UUID.randomUUID().toString());
         user.setVerificationCodeExpiresAt(LocalDateTime.now().plusMinutes(15));
         user.setEnabled(false);
         sendVerificationEmail(user);
+
         return userRepository.save(user);
     }
 
     public User authenticate(LoginDTO input) {
         User user = userRepository.findByUsername(input.username())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        if (!user.isEnabled()) {
-            System.out.println(user.isEnabled());
-            throw new RuntimeException("Account not verified. Please verify your account.");
+                .orElseThrow(() -> new AuthorizationException(HttpStatus.UNAUTHORIZED, "Bad credentials"));
+
+        if (!passwordEncoder.matches(input.password(), user.getPassword())) {
+            throw new AuthorizationException(HttpStatus.UNAUTHORIZED, "Bad credentials");
         }
+
+        if (!user.isEnabled()) {
+            throw new AuthorizationException(HttpStatus.FORBIDDEN, "Account not verified. Please verify your account.");
+        }
+
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        input.username(),
-                        input.password()
-                )
+                new UsernamePasswordAuthenticationToken(input.username(), input.password())
         );
 
         return user;
     }
 
+    @Transactional
     public void verifyUser(VerifyDTO input) {
-        Optional<User> optionalUser = userRepository.findByEmail(input.email());
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
-                throw new RuntimeException("Verification code has expired");
-            }
-            if (user.getVerificationCode().equals(input.verificationCode())) {
-                user.setEnabled(true);
-                user.setVerificationCode(null);
-                user.setVerificationCodeExpiresAt(null);
-                userRepository.save(user);
-            } else {
-                throw new RuntimeException("Invalid verification code");
-            }
-        } else {
-            throw new RuntimeException("User not found");
+        User user = userRepository.findByVerificationCode(input.token())
+                .orElseThrow(() -> new AuthorizationException(
+                        HttpStatus.BAD_REQUEST, "Invalid verification code"));
+
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new AuthorizationException(
+                    HttpStatus.BAD_REQUEST, "Verification code has expired");
         }
+
+        user.setEnabled(true);
+        user.setVerificationCode(null);
+        user.setVerificationCodeExpiresAt(null);
+
+        userRepository.save(user);
     }
 
     public void resendVerificationCode(String email) {
@@ -92,42 +118,61 @@ public class AuthenticationService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             if (user.isEnabled()) {
-                throw new RuntimeException("Account is already verified");
+                throw new AuthorizationException(HttpStatus.FORBIDDEN, "Account is already activated.");
             }
-            user.setVerificationCode(generateVerificationCode());
+            user.setVerificationCode(UUID.randomUUID().toString());
             user.setVerificationCodeExpiresAt(LocalDateTime.now().plusHours(1));
             sendVerificationEmail(user);
             userRepository.save(user);
         } else {
-            throw new RuntimeException("User not found");
+            throw new AuthorizationException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
     private void sendVerificationEmail(User user) {
         String subject = "Account Verification";
-        String verificationCode = "VERIFICATION CODE " + user.getVerificationCode();
-        String htmlMessage = "<html>"
-                + "<body style=\"font-family: Arial, sans-serif;\">"
-                + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-                + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
-                + "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
-                + "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-                + "<h3 style=\"color: #333;\">Verification Code:</h3>"
-                + "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
-                + "</div>"
-                + "</div>"
-                + "</body>"
-                + "</html>";
+        String activationLink = "http://localhost:4200/activate?token=" + user.getVerificationCode();
+
+        String htmlMessage =
+                "<html>" +
+                        "<body style=\"margin:0; padding:0; font-family:Arial, sans-serif;\">" +
+
+                        "<div style=\"max-width:600px; margin:40px auto; background-color:#ffffff; " +
+                        "border-radius:8px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);\">" +
+
+                        "<div style=\"padding:24px; text-align:center; background-color:#34352a; color:#ffffff;\">" +
+                        "<h1 style=\"margin:0; font-size:24px;\">Welcome!</h1>" +
+                        "</div>" +
+
+                        "<div style=\"padding:32px; text-align:center;\">" +
+                        "<p style=\"font-size:16px; color:#333333; margin-bottom:24px;\">" +
+                        "Thank you for creating an account. Please confirm your email address by clicking the button below." +
+                        "</p>" +
+
+                        "<a href=\"" + activationLink + "\" " +
+                        "style=\"display:inline-block; padding:14px 28px; background-color:#34352a; color:#ffffff; " +
+                        "text-decoration:none; font-size:16px; font-weight:bold; border-radius:6px;\">" +
+                        "Activate Account" +
+                        "</a>" +
+
+                        "<p style=\"font-size:14px; color:#666666; margin-top:32px;\">" +
+                        "If you did not create this account, you can safely ignore this email." +
+                        "</p>" +
+                        "</div>" +
+
+                        "<div style=\"padding:16px; text-align:center; background-color:#34352a; font-size:12px; color:#ffffff;\">" +
+                        "© 2025 Golf Results" +
+                        "</div>" +
+
+                        "</div>" +
+                        "</body>" +
+                        "</html>";
+
 
         try {
             emailService.sendVerificationEmail(user.getEmail(), subject, htmlMessage);
         } catch (MessagingException e) {
             e.printStackTrace();
         }
-    }
-    private String generateVerificationCode() {
-        Random random = new Random();
-        int code = random.nextInt(900000) + 100000;
-        return String.valueOf(code);
     }
 }

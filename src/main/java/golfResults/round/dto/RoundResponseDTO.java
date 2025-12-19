@@ -1,4 +1,4 @@
-package golfResults.round;
+package golfResults.round.dto;
 
 import lombok.Builder;
 

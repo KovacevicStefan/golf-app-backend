@@ -1,14 +1,12 @@
 package golfResults.round;
 
+import golfResults.round.dto.RoundResponseDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -19,18 +17,18 @@ public class RoundController {
     private final RoundService roundService;
 
     @GetMapping("/rounds")
-    public ResponseEntity<List<RoundResponseDTO>> getAllRounds() {
-        return new ResponseEntity<>(roundService.getAllRounds(), HttpStatus.OK);
+    public List<RoundResponseDTO> getAllRounds() {
+        return roundService.getAllRounds();
     }
 
     @GetMapping("/rounds/result/{resultId}")
-    public ResponseEntity<List<RoundResponseDTO>> getRoundsByResultId(@PathVariable Long resultId) {
-        return new ResponseEntity<>(roundService.getRoundsByResultId(resultId), HttpStatus.OK);
+    public List<RoundResponseDTO> getRoundsByResultId(@PathVariable Long resultId) {
+        return roundService.getRoundsByResultId(resultId);
     }
 
     @GetMapping("/rounds/{id}")
-    public ResponseEntity<RoundResponseDTO> getRoundById(@PathVariable Long id) {
-        return new ResponseEntity<>(roundService.getRoundById(id), HttpStatus.OK);
+    public RoundResponseDTO getRoundById(@PathVariable Long id) {
+        return roundService.getRoundById(id);
     }
 
 }

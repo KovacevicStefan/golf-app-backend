@@ -1,4 +1,4 @@
-package golfResults.exception;
+package golfResults.exception.dto;
 
 import java.time.LocalDateTime;
 

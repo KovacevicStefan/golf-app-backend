@@ -1,6 +1,6 @@
-package golfResults.tournament;
+package golfResults.tournament.dto;
 
-import golfResults.par.ParDTO;
+import golfResults.par.dto.ParDTO;
 
 import java.util.Date;
 import java.util.List;

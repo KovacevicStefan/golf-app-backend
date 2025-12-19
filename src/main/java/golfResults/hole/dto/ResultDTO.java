@@ -1,10 +1,8 @@
-package golfResults.hole;
+package golfResults.hole.dto;
 
 import java.util.List;
 
-public record ResultResponseDTO(
-        Long resultId,
-        String username,
+public record ResultDTO(
         String totalPar,
         List<StrokesDTO> roundResults,
         Long totalStrokes

@@ -1,4 +1,4 @@
-package golfResults.tournamentPlayer;
+package golfResults.tournamentPlayer.dto;
 
 import lombok.Builder;
 

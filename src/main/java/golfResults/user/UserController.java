@@ -1,5 +1,6 @@
 package golfResults.user;
 
+import golfResults.user.dto.UserResponseDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,28 +20,23 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDTO> getAuthenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User currentUser = (User) authentication.getPrincipal();
-        UserResponseDTO user = UserResponseDTO.builder()
-                .id(currentUser.getId()).email(currentUser.getEmail()).firstName(currentUser.getFirstName())
-                .lastName(currentUser.getLastName()).username(currentUser.getUsername()).image(currentUser.getImage()).build();
-        return ResponseEntity.ok(user);
+    public UserResponseDTO getAuthenticatedUser() {
+        return userService.getAuthenticatedUser();
     }
 
     @GetMapping
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
+    public List<User> getUsers() {
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.getUserById(id));
+    public UserResponseDTO getUserById(@PathVariable Long id) {
+        return userService.getUserById(id);
     }
 
     @GetMapping("/username/{username}")
-    public ResponseEntity<UserResponseDTO> getUserByUsername(@PathVariable String username) {
-        return ResponseEntity.ok(userService.getUserByUsername(username));
+    public UserResponseDTO getUserByUsername(@PathVariable String username) {
+        return userService.getUserByUsername(username);
     }
 
     @PutMapping("/{id}")
@@ -51,11 +47,13 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Optional<User>> deleteUser(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.deleteUser(id));
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
     }
 
     @DeleteMapping("/delete_all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteAllUsers() {
         userService.deleteAllUsers();
     }

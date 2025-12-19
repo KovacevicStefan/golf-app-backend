@@ -1,6 +1,7 @@
 package golfResults.round;
 
-import golfResults.exception.ResourceNotFoundException;
+import golfResults.exception.types.ResourceNotFoundException;
+import golfResults.round.dto.RoundResponseDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
