@@ -99,22 +99,22 @@ public class HoleServiceTest {
         verify(holeRepository).findById(holeId);
         verify(holeRepository).save(any(Hole.class));
     }
+/*
+    @Test
+    void shouldThrowExceptionWhenHoleNotFound() {
+        // given
+        Long holeId = 99L;
+        HoleRequestDTO request = new HoleRequestDTO(99L, 4, 5);
 
-//    @Test
-//    void shouldThrowExceptionWhenHoleNotFound() {
-//        // given
-//        Long holeId = 99L;
-//        HoleRequestDTO request = new HoleRequestDTO(99L, 4, 5);
-//
-//        when(holeRepository.findById(holeId))
-//                .thenReturn(Optional.empty());
-//
-//        // when & then
-//        assertThrows(ResourceNotFoundException.class,
-//                () -> holeService.modifyHoles(request, holeId));
-//
-//        verify(holeRepository, never()).save(any());
-//    }
+        when(holeRepository.findById(holeId))
+                .thenReturn(Optional.empty());
 
+        // when & then
+        assertThrows(ResourceNotFoundException.class,
+                () -> holeService.modifyHoles(new ArrayList<>()));
+
+        verify(holeRepository, never()).save(any());
+    }
+*/
 
 }
