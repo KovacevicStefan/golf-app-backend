@@ -10,7 +10,7 @@ on:
       - develop
 
 jobs:
-  backend-build-and-test:
+  backend-ci:
     runs-on: ubuntu-latest
 
     steps:
