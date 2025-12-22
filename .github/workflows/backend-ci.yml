@@ -1,5 +1,6 @@
 name: Backend CI
 
+# Pipeline se pokreće samo na develop grani
 on:
   push:
     branches:
@@ -13,13 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout koda
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # 2. Set up JDK
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: maven  # automatski kešira Maven dependencies
 
-      - name: Build backend Docker image (runs tests)
-        run: |
-          echo "Building backend Docker image..."
-          docker build -t golf-results-backend:ci .
+      # 3. Maven clean & install (bez testova za brzi build)
+      - name: Build project (skip tests)
+        run: mvn clean install -DskipTests
+
+      # 4. Pokretanje testova
+      - name: Run tests
+        run: mvn test | tee result.log | tail -n 20
+        # Ovim dobijamo samo poslednjih 20 linija loga testova za preglednost
+
+      # 5. Opcionalno: Docker build (ako želiš da praviš image)
+      - name: Build Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: false
+          tags: backend:latest

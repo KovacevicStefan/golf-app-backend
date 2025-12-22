@@ -25,7 +25,7 @@ public class Hole {
     @Enumerated(EnumType.STRING)
     private Score score;
 
-    @ManyToOne
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "round_id", nullable = false)
     private Round round;
 
