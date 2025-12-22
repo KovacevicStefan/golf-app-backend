@@ -28,93 +28,89 @@ import static org.mockito.Mockito.*;
 public class HoleServiceTest {
 
     @Mock
-    HoleRepository holeRepository;
+    private HoleRepository holeRepository;
 
     @Mock
-    RoundRepository roundRepository;
-
-    @Mock
-    TournamentPlayerRepository tournamentPlayerRepository;
+    private TournamentPlayerRepository tournamentPlayerRepository;
 
     @InjectMocks
-    HoleService holeService;
+    private HoleService holeService;
 
     @Test
-    void shouldModifyHoleAndReturnDto() {
+    void getAllHoles_shouldReturnDtoList() {
         // given
-        Long holeId = 1L;
-
-        Tournament tournament = Tournament.builder()
-                .name("Masters")
-                .build();
-
-        User player = User.builder()
-                .username("stefan")
-                .build();
-
-        TournamentPlayer tournamentPlayer = TournamentPlayer.builder()
-                .tournament(tournament)
-                .player(player)
-                .resultId(100L)
-                .build();
-
-        Round round = Round.builder()
-                .id(10L)
-                .tournamentPlayer(tournamentPlayer)
-                .build();
-
-        Hole existingHole = Hole.builder()
-                .id(holeId)
-                .number(1)
-                .par(4)
-                .strokes(5)
-                .score(Score.BOGEY)
-                .round(round)
-                .build();
-
-        List<HoleRequestDTO> request = new ArrayList<>();
-        request.add(new HoleRequestDTO(1L, 4, 5));
-
-        when(holeRepository.findById(holeId))
-                .thenReturn(Optional.of(existingHole));
-
-        when(holeRepository.save(any(Hole.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
+        Hole hole = TestDataFactory.hole();
+        when(holeRepository.findAll()).thenReturn(List.of(hole));
 
         // when
-        List<HoleResponseDTO> response = holeService.modifyHoles(request);
+        List<HoleResponseDTO> result = holeService.getAllHoles();
 
         // then
-       response.forEach(hole -> {
-           assertNotNull(hole);
-           assertEquals(holeId, hole.id());
-           assertEquals(1, hole.number());
-           assertEquals(4, hole.par());
-           assertEquals(5, hole.strokes());
-           assertEquals(Score.BOGEY, hole.score());
-           assertEquals(10L, hole.roundId());
-           assertEquals("Masters", hole.tournamentName());
-       });
+        assertEquals(1, result.size());
+        assertEquals(hole.getId(), result.get(0).id());
+        verify(holeRepository).findAll();
+    }
 
-        verify(holeRepository).findById(holeId);
+    @Test
+    void getHolesByRoundId_shouldReturnOnlyThatRound() {
+        // given
+        Long roundId = 1L;
+        when(holeRepository.findHolesByRoundId(roundId))
+                .thenReturn(List.of(TestDataFactory.hole()));
+
+        // when
+        List<HoleResponseDTO> result = holeService.getHolesByRoundId(roundId);
+
+        // then
+        assertFalse(result.isEmpty());
+        verify(holeRepository).findHolesByRoundId(roundId);
+    }
+
+    @Test
+    void modifyHoles_shouldUpdateAndReturnDto() {
+        // given
+        Hole oldHole = TestDataFactory.hole();
+        HoleRequestDTO request =
+                new HoleRequestDTO(oldHole.getId(), oldHole.getPar(), 4);
+
+        when(holeRepository.findById(oldHole.getId()))
+                .thenReturn(Optional.of(oldHole));
+        when(holeRepository.save(any(Hole.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        // when
+        List<HoleResponseDTO> result =
+                holeService.modifyHoles(List.of(request));
+
+        // then
+        assertEquals(1, result.size());
+        assertEquals(4, result.get(0).strokes());
         verify(holeRepository).save(any(Hole.class));
     }
-/*
+
     @Test
-    void shouldThrowExceptionWhenHoleNotFound() {
+    void modifyHoles_shouldThrowIfHoleNotFound() {
         // given
-        Long holeId = 99L;
         HoleRequestDTO request = new HoleRequestDTO(99L, 4, 5);
+        when(holeRepository.findById(99L)).thenReturn(Optional.empty());
 
-        when(holeRepository.findById(holeId))
-                .thenReturn(Optional.empty());
-
-        // when & then
+        // then
         assertThrows(ResourceNotFoundException.class,
-                () -> holeService.modifyHoles(new ArrayList<>()));
-
-        verify(holeRepository, never()).save(any());
+                () -> holeService.modifyHoles(List.of(request)));
     }
-*/
+
+    @Test
+    void getTotalPar_shouldReturnFormattedValue() {
+        // given
+        Long resultId = 1L;
+        when(holeRepository.findTotalStrokesSumByResultId(resultId)).thenReturn(72L);
+        when(holeRepository.findTotalParSumByResultId(resultId)).thenReturn(70L);
+
+        // when
+        String result = holeService.getTotalPar(resultId);
+
+        // then
+        assertEquals("+2", result);
+    }
 
 }
